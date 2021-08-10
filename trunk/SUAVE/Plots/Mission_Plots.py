@@ -475,7 +475,7 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
         airspeed = segment.conditions.freestream.velocity[:,0] /   Units['mph']  
         theta    = segment.conditions.frames.body.inertial_rotations[:,1,None] / Units.deg
         
-        x        = segment.conditions.frames.inertial.position_vector[:,0]/ Units.nmi
+        x        = segment.conditions.frames.inertial.position_vector[:,0]/ Units.mile
         y        = segment.conditions.frames.inertial.position_vector[:,1]
         z        = segment.conditions.frames.inertial.position_vector[:,2]
         altitude = segment.conditions.freestream.altitude[:,0]/Units.feet
@@ -498,7 +498,7 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
         
         axes = plt.subplot(2,2,4)
         axes.plot( time , x, 'bo-')
-        axes.set_ylabel('Range (nautical miles)',axis_font)
+        axes.set_ylabel('Range (miles)',axis_font)
         axes.set_xlabel('Time (min)',axis_font)
         set_axes(axes)         
         
@@ -775,7 +775,7 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
     Inputs:
     results.segments.conditions.propulsion
          throttle 
-         rotor_throttle 
+         lift_rotor_throttle 
          battery_energy
          battery_specfic_power 
          voltage_under_load  
@@ -805,7 +805,7 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
 
         axes = plt.subplot(2,2,1)
         axes.plot(time, eta, 'bo-',label='Propeller Motor')
-        axes.plot(time, eta_l, 'r^-',label='Rotor Motor')
+        axes.plot(time, eta_l, 'r^-',label='Lift Rotor Motor')
         axes.set_ylabel('Throttle',axis_font)
         set_axes(axes)     
         plt.ylim((0,1))
@@ -849,35 +849,35 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
         prop_effp    = results.segments[i].conditions.propulsion.propeller_efficiency[:,0]
         prop_effm    = results.segments[i].conditions.propulsion.propeller_motor_efficiency[:,0]
         prop_Cp      = results.segments[i].conditions.propulsion.propeller_power_coefficient[:,0]
-        rotor_rpm    = results.segments[i].conditions.propulsion.rotor_rpm[:,0] 
-        rotor_thrust = -results.segments[i].conditions.frames.body.thrust_force_vector[:,2]
-        rotor_torque = results.segments[i].conditions.propulsion.rotor_motor_torque[:,0]
-        rotor_effp   = results.segments[i].conditions.propulsion.rotor_efficiency[:,0]
-        rotor_effm   = results.segments[i].conditions.propulsion.rotor_motor_efficiency[:,0] 
-        rotor_Cp     = results.segments[i].conditions.propulsion.rotor_power_coefficient[:,0]        
+        lift_rotor_rpm    = results.segments[i].conditions.propulsion.lift_rotor_rpm[:,0] 
+        lift_rotor_thrust = -results.segments[i].conditions.frames.body.thrust_force_vector[:,2]
+        lift_rotor_torque = results.segments[i].conditions.propulsion.lift_rotor_motor_torque[:,0]
+        lift_rotor_effp   = results.segments[i].conditions.propulsion.lift_rotor_efficiency[:,0]
+        lift_rotor_effm   = results.segments[i].conditions.propulsion.lift_rotor_motor_efficiency[:,0] 
+        lift_rotor_Cp     = results.segments[i].conditions.propulsion.lift_rotor_power_coefficient[:,0]        
     
         axes = plt.subplot(2,3,1)
         axes.plot(time, prop_rpm, 'bo-')
-        axes.plot(time, rotor_rpm, 'r^-')
+        axes.plot(time, lift_rotor_rpm, 'r^-')
         axes.set_ylabel('RPM',axis_font)
         set_axes(axes)      
     
         axes = plt.subplot(2,3,2)
         axes.plot(time, prop_thrust, 'bo-')
-        axes.plot(time, rotor_thrust, 'r^-')
+        axes.plot(time, lift_rotor_thrust, 'r^-')
         axes.set_ylabel('Thrust (N)',axis_font)
         set_axes(axes)  
     
         axes = plt.subplot(2,3,3)
         axes.plot(time, prop_torque, 'bo-' )
-        axes.plot(time, rotor_torque, 'r^-' )
+        axes.plot(time, lift_rotor_torque, 'r^-' )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel('Torque (N-m)',axis_font)
         set_axes(axes)
     
         axes = plt.subplot(2,3,4)
         axes.plot(time, prop_effp, 'bo-' )
-        axes.plot(time, rotor_effp, 'r^-' )
+        axes.plot(time, lift_rotor_effp, 'r^-' )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel(r'Propeller Efficiency, $\eta_{propeller}$',axis_font)
         set_axes(axes)      
@@ -885,7 +885,7 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
     
         axes = plt.subplot(2,3,5)
         axes.plot(time, prop_effm, 'bo-' )
-        axes.plot(time, rotor_effm, 'r^-' )
+        axes.plot(time, lift_rotor_effm, 'r^-' )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel(r'Motor Efficiency, $\eta_{motor}$',axis_font)
         set_axes(axes)       
@@ -893,7 +893,7 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
     
         axes = plt.subplot(2,3,6)
         axes.plot(time, prop_Cp, 'bo-' )
-        axes.plot(time, rotor_Cp, 'r^-'  )
+        axes.plot(time, lift_rotor_Cp, 'r^-'  )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel('Power Coefficient',axis_font)
         set_axes(axes)
@@ -904,16 +904,16 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
     # ------------------------------------------------------------------
     #   Propulsion Conditions
     # ------------------------------------------------------------------
-    fig = plt.figure("Rotor")
+    fig = plt.figure("Lift Rotor")
     fig.set_size_inches(16, 8)
     for i in range(len(results.segments)):          
         time   = results.segments[i].conditions.frames.inertial.time[:,0] / Units.min
-        rpm    = results.segments[i].conditions.propulsion.rotor_rpm [:,0] 
+        rpm    = results.segments[i].conditions.propulsion.lift_rotor_rpm [:,0] 
         thrust = results.segments[i].conditions.frames.body.thrust_force_vector[:,2]
-        torque = results.segments[i].conditions.propulsion.rotor_motor_torque
-        effp   = results.segments[i].conditions.propulsion.rotor_efficiency[:,0]
-        effm   = results.segments[i].conditions.propulsion.rotor_motor_efficiency[:,0] 
-        Cp     = results.segments[i].conditions.propulsion.rotor_power_coefficient[:,0]
+        torque = results.segments[i].conditions.propulsion.lift_rotor_motor_torque
+        effp   = results.segments[i].conditions.propulsion.lift_rotor_efficiency[:,0]
+        effm   = results.segments[i].conditions.propulsion.lift_rotor_motor_efficiency[:,0] 
+        Cp     = results.segments[i].conditions.propulsion.lift_rotor_power_coefficient[:,0]
     
         axes = plt.subplot(2,3,1)
         axes.plot(time, rpm, 'r^-')
@@ -932,9 +932,9 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
         set_axes(axes)
     
         axes = plt.subplot(2,3,4)
-        axes.plot(time, effp, 'r^-',label= r'$\eta_{rotor}$' ) 
+        axes.plot(time, effp, 'r^-',label= r'$\eta_{lift_rotor}$' ) 
         axes.set_xlabel('Time (mins)',axis_font)
-        axes.set_ylabel(r'Propeller Efficiency $\eta_{rotor}$',axis_font)
+        axes.set_ylabel(r'Propeller Efficiency $\eta_{lift_rotor}$',axis_font)
         set_axes(axes)    
         plt.ylim((0,1))
     
@@ -952,7 +952,7 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
         set_axes(axes)            
     
     if save_figure:
-        plt.savefig("Rotor" + file_type)  
+        plt.savefig("Lift_Rotor" + file_type)  
         
     # ------------------------------------------------------------------
     #   Propulsion Conditions
@@ -1012,12 +1012,12 @@ def plot_lift_cruise_network(results, line_color = 'bo-', save_figure = False, s
     fig = plt.figure("Tip_Mach") 
     for i in range(len(results.segments)):          
         time = results.segments[i].conditions.frames.inertial.time[:,0] / Units.min 
-        rtm  = results.segments[i].conditions.propulsion.rotor_tip_mach[:,0]
+        rtm  = results.segments[i].conditions.propulsion.lift_rotor_tip_mach[:,0]
         ptm  = results.segments[i].conditions.propulsion.propeller_tip_mach[:,0] 
         
         axes = plt.subplot(1,1,1)
         axes.plot(time, ptm, 'bo-',label='Propeller')
-        axes.plot(time, rtm, 'r^-',label='Rotor')
+        axes.plot(time, rtm, 'r^-',label='Lift Rotor')
         axes.set_ylabel('Mach',axis_font)
         set_axes(axes)   
         if i == 0:
@@ -1061,6 +1061,7 @@ def plot_surface_pressure_contours(results,vehicle, save_figure = False, save_fi
     n_cw       = VD.n_cw 
     n_sw       = VD.n_sw 
     n_w        = VD.n_w 
+    b_pts      = np.concatenate(([0],np.cumsum(VD.n_sw*VD.n_cw)))
     
     # Create a boolean for not plotting vertical wings
     idx        = 0
@@ -1092,12 +1093,12 @@ def plot_surface_pressure_contours(results,vehicle, save_figure = False, save_fi
             axes.set_xlim(-y_max, y_max)            
             fig.set_size_inches(8,8)         	 
             for i in range(n_w):
-                n_pts     = (n_sw + 1) * (n_cw + 1) 
+                n_pts     = (n_sw[i] + 1) * (n_cw[i]+ 1) 
                 xc_pts    = VD.X[i*(n_pts):(i+1)*(n_pts)]
-                x_pts     = np.reshape(np.atleast_2d(VD.XC[i*(n_sw*n_cw):(i+1)*(n_sw*n_cw)]).T, (n_sw,-1))
-                y_pts     = np.reshape(np.atleast_2d(VD.YC[i*(n_sw*n_cw):(i+1)*(n_sw*n_cw)]).T, (n_sw,-1))
-                z_pts     = np.reshape(np.atleast_2d(CP[i*(n_sw*n_cw):(i+1)*(n_sw*n_cw)]).T, (n_sw,-1))
-                x_pts_p   = x_pts*((n_cw+1)/n_cw) - x_pts[0,0]*((n_cw+1)/n_cw)  +  xc_pts[0] 
+                x_pts     = np.reshape(np.atleast_2d(VD.XC[b_pts[i]:b_pts[i+1]]).T, (n_sw[i],-1))
+                y_pts     = np.reshape(np.atleast_2d(VD.YC[b_pts[i]:b_pts[i+1]]).T, (n_sw[i],-1))
+                z_pts     = np.reshape(np.atleast_2d(CP[b_pts[i]:b_pts[i+1]]).T, (n_sw[i],-1))
+                x_pts_p   = x_pts*((n_cw[i]+1)/n_cw[i]) - x_pts[0,0]*((n_cw[i]+1)/n_cw[i])  +  xc_pts[0] 
                 points    = np.linspace(0.001,1,50)
                 A         = np.cumsum(np.sin(np.pi/2*points))
                 levals    = -(np.concatenate([-A[::-1],A[1:]])/(2*A[-1])  + A[-1]/(2*A[-1]) )[::-1]*0.015  
@@ -1147,34 +1148,31 @@ def plot_lift_distribution(results,vehicle, save_figure = False, save_filename =
     N/A	
     """   
     VD         = vehicle.vortex_distribution	 	
-    n_sw       = VD.n_sw 
     n_w        = VD.n_w
+    b_sw       = np.concatenate(([0],np.cumsum(VD.n_sw)))
     
     axis_font  = {'size':'12'}  	
     img_idx    = 1
-
+    seg_idx    = 1
     for segment in results.segments.values():   	
         num_ctrl_pts = len(segment.conditions.frames.inertial.time)	
         for ti in range(num_ctrl_pts):  
-            try: 
-                cl_y = segment.conditions.aerodynamics.lift_breakdown.inviscid_wings_sectional[ti] 
-                line = ['-b','-b','-r','-r','-k']
-                fig  = plt.figure()
-                fig.set_size_inches(8,8)       
-                axes = plt.subplot(1,1,1)
-                for i in range(n_w): 
-                    y_pts = VD.Y_SW[i*(n_sw):(i+1)*(n_sw)]
-                    z_pts = cl_y[i*(n_sw):(i+1)*(n_sw)]
-                    axes.plot(y_pts, z_pts, line[i] ) 
-                axes.set_xlabel("Spanwise Location (m)",axis_font)
-                axes.set_title('$C_{Ly}$' + '_' + segment.tag + '_' + str(img_idx),axis_font)  
-                
-                if save_figure: 
-                    plt.savefig( save_filename + '_' + segment.tag + '_' + str(img_idx) + file_type) 	
-                img_idx += 1
-            except:
-                pass
-       
+            cl_y = segment.conditions.aerodynamics.lift_breakdown.inviscid_wings_sectional[ti] 
+            line = ['-b','-b','-r','-r','-k']
+            fig  = plt.figure()
+            fig.set_size_inches(8,8)       
+            axes = plt.subplot(1,1,1)
+            for i in range(n_w): 
+                y_pts = VD.Y_SW[b_sw[i]:b_sw[i+1]]
+                z_pts = cl_y[b_sw[i]:b_sw[i+1]]
+                axes.plot(y_pts, z_pts, line[i] ) 
+            axes.set_xlabel("Spanwise Location (m)",axis_font)
+            axes.set_title('$C_{Ly}$',axis_font)  
+            
+            if save_figure: 
+                plt.savefig( save_filename + '_' + str(img_idx) + file_type) 	
+            img_idx += 1
+        seg_idx +=1
         
     return      
  
@@ -1218,6 +1216,7 @@ def create_video_frames(results,vehicle, save_figure = True ,flight_profile = Tr
     n_sw       = VD.n_sw 
     n_w        = VD.n_w
     n_fus      = VD.n_fus
+    b_pts      = np.concatenate(([0],np.cumsum(VD.n_sw*VD.n_cw)))
     
     # Create a boolean for not plotting vertical wings
     idx        = 0
@@ -1253,12 +1252,12 @@ def create_video_frames(results,vehicle, save_figure = True ,flight_profile = Tr
             
             # plot wing CP distribution   
             for i in range(n_w):
-                n_pts     = (n_sw + 1) * (n_cw + 1) 
+                n_pts     = (n_sw[i] + 1) * (n_cw[i]+ 1) 
                 xc_pts    = VD.X[i*(n_pts):(i+1)*(n_pts)]
-                x_pts     = np.reshape(np.atleast_2d(VD.XC[i*(n_sw*n_cw):(i+1)*(n_sw*n_cw)]).T, (n_sw,-1))
-                y_pts     = np.reshape(np.atleast_2d(VD.YC[i*(n_sw*n_cw):(i+1)*(n_sw*n_cw)]).T, (n_sw,-1))
-                z_pts     = np.reshape(np.atleast_2d(CP[i*(n_sw*n_cw):(i+1)*(n_sw*n_cw)]).T, (n_sw,-1))  
-                x_pts_p   = x_pts*((n_cw+1)/n_cw) - x_pts[0,0]*((n_cw+1)/n_cw)  +  xc_pts[0]  
+                x_pts     = np.reshape(np.atleast_2d(VD.XC[b_pts[i]:b_pts[i+1]]).T, (n_sw[i],-1))
+                y_pts     = np.reshape(np.atleast_2d(VD.YC[b_pts[i]:b_pts[i+1]]).T, (n_sw[i],-1))
+                z_pts     = np.reshape(np.atleast_2d(CP[b_pts[i]:b_pts[i+1]]).T, (n_sw[i],-1))  
+                x_pts_p   = x_pts*((n_cw[i]+1)/n_cw[i]) - x_pts[0,0]*((n_cw[i]+1)/n_cw[i])  +  xc_pts[0]  
                 points    = np.linspace(0.001,1,50)
                 A         = np.cumsum(np.sin(np.pi/2*points))
                 levals    = -(np.concatenate([-A[::-1],A[1:]])/(2*A[-1])  + A[-1]/(2*A[-1]) )[::-1]*0.015  
@@ -1386,7 +1385,6 @@ def plot_noise_level(results, line_color = 'bo-', save_figure = False, save_file
     fig          = plt.figure(save_filename)
     fig.set_size_inches(10, 8) 
     axes1        = fig.add_subplot(1,1,1)
-    axes2        = axes1.twinx()
     
     # loop through control points
     for i in range(dim_seg):    
@@ -1394,19 +1392,18 @@ def plot_noise_level(results, line_color = 'bo-', save_figure = False, save_file
         time   = results.segments[i].conditions.frames.inertial.time[:,0] / Units.min 
         alt    = results.segments[i].conditions.freestream.altitude[:,0] / Units.ft
         SPL    = results.segments[i].conditions.noise.total_SPL_dBA.reshape(dim_ctrl_pts,dim_mic,dim_mic)
+        
         for j in range(dim_mic):
             if i == 0:
                 axes1.plot(time, SPL[:,center_line,j], color = colors[j], label= r'$\phi$ = ' + str(round(angles[j],1)) + r' $\degree$' ) 
             else:
                 axes1.plot(time, SPL[:,center_line,j], color = colors[j]) 
-        
-        axes2.plot(time, alt, 'k-')   
-        
-    axes2.set_ylim(0, 3000)   
-    axes1.set_ylim(0, 150)           
-    axes1.set_ylabel('SPL (dBA)'    ,axis_font)
-    axes1.set_xlabel('Time (min)'   ,axis_font)
-    axes2.set_ylabel('Altitude (ft)',axis_font)   
+        axes2 = axes1.twinx()
+        axes2.plot(time, alt, 'k-')      
+        axes1.set_ylabel('SPL (dBA)',axis_font)
+        axes1.set_xlabel('Time (min)',axis_font)
+        axes2.set_ylabel('Altitude (ft)',axis_font)  
+    
     axes1.legend(loc='upper right')        
     if save_figure:
         plt.savefig(save_filename + ".png")  
